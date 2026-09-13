@@ -4,9 +4,9 @@ package org.claujunior.servers;
 import org.claujunior.servers.http.HttpServer;
 import org.claujunior.servers.udp.UDPServer;
 
-public class serverFactory {
+public class ServerFactory {
 
-        public static interfaceServer create(
+        public static InterfaceServer create(
                 String type,
                 int port,
                 int backlog) {

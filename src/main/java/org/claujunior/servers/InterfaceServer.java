@@ -1,6 +1,6 @@
 package org.claujunior.servers;
 
-public interface interfaceServer {
+public interface InterfaceServer {
     void start();
     void stop();
 }

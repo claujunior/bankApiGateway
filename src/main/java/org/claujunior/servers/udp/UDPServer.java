@@ -1,12 +1,12 @@
 package org.claujunior.servers.udp;
 
-import org.claujunior.servers.interfaceServer;
+import org.claujunior.servers.InterfaceServer;
 
 import java.io.IOException;
 import java.net.DatagramPacket;
 import java.net.DatagramSocket;
 
-public class UDPServer implements interfaceServer {
+public class UDPServer implements InterfaceServer {
     private DatagramSocket serverSocket;
     int port;
     int backlog;
