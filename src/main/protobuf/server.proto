@@ -1,0 +1,12 @@
+syntax = "proto3";
+package bankApiGateway;
+option java_package = "grpc";
+option java_multiple_files = true;
+
+message Endereco {
+  string rua = 1;
+  string bairro = 2;
+  string cidade = 3;
+  string estado = 4;
+  string cep = 5;
+}
