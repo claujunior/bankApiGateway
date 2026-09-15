@@ -1,10 +1,12 @@
 package org.claujunior.servers;
 
+import org.claujunior.heartbeat.TimeoutBasedFailureDetector;
 import org.claujunior.servers.udp.clientHandlerUdp;
 
 import java.util.List;
 
 public class ApiGateway {
+    TimeoutBasedFailureDetector<String> executor = new TimeoutBasedFailureDetector<String>(100);
     List<InterfaceServer> servers;
     public ApiGateway(List<InterfaceServer> servers){
         this.servers=servers;
@@ -13,6 +15,7 @@ public class ApiGateway {
         for(InterfaceServer server : servers){
             new Thread(server::start).start();
         }
+        executor.start();
     }
     public void stop(){
         for(InterfaceServer server : servers){
