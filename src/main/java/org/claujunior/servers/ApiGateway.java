@@ -6,8 +6,8 @@ import org.claujunior.servers.udp.clientHandlerUdp;
 import java.util.List;
 
 public class ApiGateway {
-    TimeoutBasedFailureDetector<String> executor = new TimeoutBasedFailureDetector<String>(100);
-    List<InterfaceServer> servers;
+    private TimeoutBasedFailureDetector<String> executor = TimeoutBasedFailureDetector.getInstance();
+    private List<InterfaceServer> servers;
     public ApiGateway(List<InterfaceServer> servers){
         this.servers=servers;
     }

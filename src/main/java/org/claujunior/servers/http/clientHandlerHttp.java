@@ -1,6 +1,7 @@
 package org.claujunior.servers.http;
 
 import org.claujunior.client.HttpClient;
+import org.claujunior.heartbeat.TimeoutBasedFailureDetector;
 
 import java.io.BufferedReader;
 import java.io.DataOutputStream;
@@ -12,7 +13,7 @@ import java.util.StringTokenizer;
 
 public class clientHandlerHttp implements Runnable{
     private Socket socket;
-
+    private TimeoutBasedFailureDetector<String> executor = TimeoutBasedFailureDetector.getInstance();
     public clientHandlerHttp(Socket socket){
         this.socket = socket;
     }
@@ -27,7 +28,7 @@ public class clientHandlerHttp implements Runnable{
                 new InputStreamReader(socket.getInputStream()));) {
 
             String headerLine = in.readLine();
-
+            String clientIp = socket.getInetAddress().getHostAddress();
             StringTokenizer tokenizer = new StringTokenizer(headerLine);
 
             String httpMethod = tokenizer.nextToken();
@@ -50,12 +51,17 @@ public class clientHandlerHttp implements Runnable{
                 sendResponse(socket, 200, httpVersion + recurso);
             }
             else {
-                if (httpMethod.equals("GET")) {
+                if(httpMethod.equals("GET")){
+                    executor.heartBeatReceived(clientIp);
+                    sendResponse(socket,200,"mande outra");
+                }
+                else if (httpMethod.equals("GET")) {
                     if(recurso.equals("/cliente")){
                         sendResponse(socket, 200,httpClient.request(recurso,httpMethod,httpVersion,json));
                     }
 
                 } else if (httpMethod.equals("POST")) {
+
                     sendResponse(socket, 200, "POST");
                 } else if (httpMethod.equals("PUT")) {
                     sendResponse(socket, 200, "PUT");

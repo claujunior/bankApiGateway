@@ -1,13 +1,23 @@
 package org.claujunior.heartbeat;
 
+import org.claujunior.client.HttpClient;
+
 import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 
 public class TimeoutBasedFailureDetector <T> extends AbstractFailureDetector<T>{
+    private static final TimeoutBasedFailureDetector <String> instance = new TimeoutBasedFailureDetector <String>(10000000000l);
+
+
+
+    public static TimeoutBasedFailureDetector <String> getInstance() {
+        return instance;
+    }
+
     private final long timeoutNanos;
 
-    public TimeoutBasedFailureDetector(long timeoutNanos) {
+    private TimeoutBasedFailureDetector(long timeoutNanos) {
         this.timeoutNanos = timeoutNanos;
     }
 
@@ -29,7 +39,7 @@ public class TimeoutBasedFailureDetector <T> extends AbstractFailureDetector<T>{
     }
 
     @Override
-    void heartBeatReceived(T serverId) {
+    public void heartBeatReceived(T serverId) {
         Long currentTime = System.nanoTime();
         heartbeatReceivedTimes.put(serverId, currentTime);
         markUp(serverId);
