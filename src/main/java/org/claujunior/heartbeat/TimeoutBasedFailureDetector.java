@@ -21,6 +21,10 @@ public class TimeoutBasedFailureDetector <T> extends AbstractFailureDetector<T>{
         this.timeoutNanos = timeoutNanos;
     }
 
+    private final Map<T, Long> heartbeatReceivedTimesInvestimento =
+            new ConcurrentHashMap<>();
+    private final Map<T, Long> heartbeatReceivedTimesContaCorrente =
+            new ConcurrentHashMap<>();
     private final Map<T, Long> heartbeatReceivedTimes =
             new ConcurrentHashMap<>();
 
@@ -33,14 +37,26 @@ public class TimeoutBasedFailureDetector <T> extends AbstractFailureDetector<T>{
             Long timeSinceLastHeartbeat = now - lastHeartbeatReceivedTime;
             if (timeSinceLastHeartbeat >= timeoutNanos) {
                 heartbeatReceivedTimes.remove(serverId);
+                    if(heartbeatReceivedTimesContaCorrente.get(serverId)!=null){
+                        heartbeatReceivedTimesContaCorrente.remove(serverId);
+                    }
+                    else if(heartbeatReceivedTimesInvestimento.get(serverId)!=null){
+                        heartbeatReceivedTimesInvestimento.remove(serverId);
+                    }
                 markDown(serverId);
             }
         }
     }
 
     @Override
-    public void heartBeatReceived(T serverId) {
+    public void heartBeatReceived(T serverId,String servico) {
         Long currentTime = System.nanoTime();
+        if(servico.equals("investimento")){
+            heartbeatReceivedTimesInvestimento.put(serverId,currentTime);
+        }
+        else if(servico.equals("contaCorrente")){
+            heartbeatReceivedTimesContaCorrente.put(serverId,currentTime);
+        }
         heartbeatReceivedTimes.put(serverId, currentTime);
         markUp(serverId);
     }

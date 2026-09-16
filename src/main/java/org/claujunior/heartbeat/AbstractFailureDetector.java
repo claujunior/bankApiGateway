@@ -6,6 +6,6 @@ abstract class AbstractFailureDetector <T>{
         heartbeatScheduler.start();
     }
     abstract void heartBeatCheck();
-    abstract void heartBeatReceived(T serverId);
+    abstract void heartBeatReceived(T serverId,String servico);
 
 }

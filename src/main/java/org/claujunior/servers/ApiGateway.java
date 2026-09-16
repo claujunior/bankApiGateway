@@ -17,9 +17,4 @@ public class ApiGateway {
         }
         executor.start();
     }
-    public void stop(){
-        for(InterfaceServer server : servers){
-            server.stop();
-        }
-    }
 }

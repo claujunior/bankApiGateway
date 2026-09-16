@@ -3,44 +3,11 @@ package bankApiGateway;
 option java_package = "grpc";
 option java_multiple_files = true;
 
-message Endereco {
-  string rua = 1;
-  string bairro = 2;
-  string cidade = 3;
-  string estado = 4;
-  string cep = 5;
-}
-
-enum TipoChavePix {
-  CPF = 0;
-  CNPJ = 1;
-  EMAIL = 2;
-  TELEFONE = 3;
-  ALEATORIA = 4;
-}
-
-message ChavePix {
-  string chave = 1;
-  TipoChavePix tipo = 2;
-}
 message Cliente {
   string nome = 1;
   int32 idade = 2;
-  string email = 3;
-  bool vinculoempreg = 4;
-  double salario = 5;
-  int32 numero_conta = 6;
-  double saldo = 7;
-  Endereco endereco = 8;
-  repeated Dependente dependentes = 9;
-  map<string, ChavePix> chaves_pix = 10;
-}
-
-
-message Dependente {
-  string nome = 1;
-  int32 idade = 2;
-  string parentesco = 3;
+  string CPF = 3;
+  double saldo = 4;
 }
 
 message CadastroResponse {

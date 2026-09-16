@@ -13,8 +13,9 @@ public class App
     {
         InterfaceServer http = ServerFactory.create("HTTP", 8080, 300);
         InterfaceServer udp = ServerFactory.create("UDP", 8081, 300);
+        InterfaceServer grpc = ServerFactory.create("GRPC", 8082, 300);
 
-        ApiGateway apiGateway = new ApiGateway(List.of(http, udp));
+        ApiGateway apiGateway = new ApiGateway(List.of(http, udp,grpc));
         apiGateway.start();
     }
 }

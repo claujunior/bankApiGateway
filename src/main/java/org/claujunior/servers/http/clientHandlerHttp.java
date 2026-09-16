@@ -13,6 +13,7 @@ import java.util.StringTokenizer;
 
 public class clientHandlerHttp implements Runnable{
     private Socket socket;
+    private HttpClient httpClient = HttpClient.getInstance();
     private TimeoutBasedFailureDetector<String> executor = TimeoutBasedFailureDetector.getInstance();
     public clientHandlerHttp(Socket socket){
         this.socket = socket;
@@ -48,24 +49,53 @@ public class clientHandlerHttp implements Runnable{
             String json = new String(bodychar,0,num);
             HttpClient httpClient = HttpClient.getInstance();
             if(!httpVersion.equals("HTTP/1.1")){
-                sendResponse(socket, 200, httpVersion + recurso);
+                sendResponse(socket, 200, "Correct version HTTP/1.1");
+            }
+            else if (recurso.contains("health")){
+                if(recurso.contains("investimento")){
+                    executor.heartBeatReceived(clientIp,"investimento");
+                }
+                else if (recurso.contains("contaCorrente")){
+                    executor.heartBeatReceived(clientIp,"contaCorrente");
+                }
+                sendResponse(socket,200,"mande outra");
             }
             else {
                 if(httpMethod.equals("GET")){
-                    executor.heartBeatReceived(clientIp);
-                    sendResponse(socket,200,"mande outra");
-                }
-                else if (httpMethod.equals("GET")) {
-                    if(recurso.equals("/cliente")){
-                        sendResponse(socket, 200,httpClient.request(recurso,httpMethod,httpVersion,json));
+                    if(recurso.contains("investimento")){
+                        httpClient.request(recurso,httpMethod,httpVersion,json);
                     }
-
+                    else if(recurso.contains("contaCorrente")){
+                        httpClient.request(recurso,httpMethod,httpVersion,json);
+                    }
+                    sendResponse(socket,200,"mande outra");
                 } else if (httpMethod.equals("POST")) {
+                    if(recurso.contains("investimento")){
+                        if(recurso.contains("criar")){
 
+                        }
+                    }
+                    else if(recurso.contains("contaCorrente")){
+                        if(recurso.contains("criar")){
+
+                        }
+                    }
                     sendResponse(socket, 200, "POST");
                 } else if (httpMethod.equals("PUT")) {
+                    if(recurso.contains("investimento")){
+
+                    }
+                    else if(recurso.contains("contaCorrente")){
+
+                    }
                     sendResponse(socket, 200, "PUT");
                 } else if (httpMethod.equals("DELETE")) {
+                    if(recurso.contains("investimento")){
+
+                    }
+                    else if(recurso.contains("contaCorrente")){
+
+                    }
                     sendResponse(socket, 200, "DELETE");
                 } else {
                     sendResponse(socket, 405, "Method Not Allowed");

@@ -32,10 +32,5 @@ public class UDPServer implements InterfaceServer {
         }
     }
 
-    @Override
-    public void stop(){
-        if(serverSocket!=null){
-            serverSocket.close();
-        }
-    }
+
 }

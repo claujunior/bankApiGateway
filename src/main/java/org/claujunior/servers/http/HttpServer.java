@@ -32,14 +32,5 @@ public class HttpServer implements InterfaceServer {
         }
     }
 
-    @Override
-    public void stop(){
-        try {
-            if (serverSocket != null) {
-                serverSocket.close();
-            }
-        } catch (IOException ex) {
-            ex.printStackTrace();
-        }
-    }
+
 }
