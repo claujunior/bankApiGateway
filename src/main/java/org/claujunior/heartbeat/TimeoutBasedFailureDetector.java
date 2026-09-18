@@ -2,8 +2,10 @@ package org.claujunior.heartbeat;
 
 import org.claujunior.client.HttpClient;
 
+import java.util.LinkedList;
 import java.util.Map;
 import java.util.Set;
+import java.util.List;
 import java.util.concurrent.ConcurrentHashMap;
 
 public class TimeoutBasedFailureDetector <T> extends AbstractFailureDetector<T>{
@@ -21,10 +23,10 @@ public class TimeoutBasedFailureDetector <T> extends AbstractFailureDetector<T>{
         this.timeoutNanos = timeoutNanos;
     }
 
-    private final Map<T, Long> heartbeatReceivedTimesInvestimento =
-            new ConcurrentHashMap<>();
-    private final Map<T, Long> heartbeatReceivedTimesContaCorrente =
-            new ConcurrentHashMap<>();
+    private final List<T> heartbeatReceivedTimesInvestimento =
+            new LinkedList<>();
+    private final List<T> heartbeatReceivedTimesContaCorrente =
+            new LinkedList<>();
     private final Map<T, Long> heartbeatReceivedTimes =
             new ConcurrentHashMap<>();
 
@@ -37,10 +39,10 @@ public class TimeoutBasedFailureDetector <T> extends AbstractFailureDetector<T>{
             Long timeSinceLastHeartbeat = now - lastHeartbeatReceivedTime;
             if (timeSinceLastHeartbeat >= timeoutNanos) {
                 heartbeatReceivedTimes.remove(serverId);
-                    if(heartbeatReceivedTimesContaCorrente.get(serverId)!=null){
+                    if(!heartbeatReceivedTimesContaCorrente.contains(serverId)){
                         heartbeatReceivedTimesContaCorrente.remove(serverId);
                     }
-                    else if(heartbeatReceivedTimesInvestimento.get(serverId)!=null){
+                    else if(!heartbeatReceivedTimesInvestimento.contains(serverId)){
                         heartbeatReceivedTimesInvestimento.remove(serverId);
                     }
                 markDown(serverId);
@@ -52,10 +54,10 @@ public class TimeoutBasedFailureDetector <T> extends AbstractFailureDetector<T>{
     public void heartBeatReceived(T serverId,String servico) {
         Long currentTime = System.nanoTime();
         if(servico.equals("investimento")){
-            heartbeatReceivedTimesInvestimento.put(serverId,currentTime);
+            heartbeatReceivedTimesInvestimento.add(serverId);
         }
         else if(servico.equals("contaCorrente")){
-            heartbeatReceivedTimesContaCorrente.put(serverId,currentTime);
+            heartbeatReceivedTimesContaCorrente.add(serverId);
         }
         heartbeatReceivedTimes.put(serverId, currentTime);
         markUp(serverId);
@@ -70,5 +72,30 @@ public class TimeoutBasedFailureDetector <T> extends AbstractFailureDetector<T>{
                 "Servidor " + serverId + " em pe"
         );
     }
-
+    public T choice (String selecao){
+        if(selecao=="investimento"){
+            if(heartbeatReceivedTimesInvestimento.isEmpty()){
+                //ex
+            }
+            else{
+                T resultado = heartbeatReceivedTimesInvestimento.getFirst();
+                heartbeatReceivedTimesInvestimento.add(heartbeatReceivedTimesInvestimento.removeFirst());
+                return resultado;
+            }
+        }
+        else if(selecao=="contaCorrente"){
+            if(heartbeatReceivedTimesContaCorrente.isEmpty()){
+                //ex
+            }
+            else{
+                T resultado = heartbeatReceivedTimesContaCorrente.getFirst();
+                heartbeatReceivedTimesContaCorrente.add(heartbeatReceivedTimesContaCorrente.removeFirst());
+                return resultado;
+            }
+        }
+        else{
+            //ex
+        }
+        return null;
+    }
 }

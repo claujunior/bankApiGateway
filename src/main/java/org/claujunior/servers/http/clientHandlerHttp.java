@@ -63,10 +63,11 @@ public class clientHandlerHttp implements Runnable{
             else {
                 if(httpMethod.equals("GET")){
                     if(recurso.contains("investimento")){
-                        httpClient.request(recurso,httpMethod,httpVersion,json);
+
+                        httpClient.request(recurso,httpMethod,httpVersion,json,"investimento");
                     }
                     else if(recurso.contains("contaCorrente")){
-                        httpClient.request(recurso,httpMethod,httpVersion,json);
+                        httpClient.request(recurso,httpMethod,httpVersion,json,"contaCorrente");
                     }
                     sendResponse(socket,200,"mande outra");
                 } else if (httpMethod.equals("POST")) {

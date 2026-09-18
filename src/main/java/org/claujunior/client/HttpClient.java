@@ -1,6 +1,7 @@
 package org.claujunior.client;
 
-import io.grpc.netty.shaded.io.netty.handler.codec.http.HttpVersion;
+
+import org.claujunior.heartbeat.TimeoutBasedFailureDetector;
 
 import java.io.BufferedReader;
 import java.io.IOException;
@@ -17,11 +18,12 @@ public class HttpClient {
     public static HttpClient getInstance() {
         return instance;
     }
+    private TimeoutBasedFailureDetector<String> executor = TimeoutBasedFailureDetector.getInstance();
 
-    public String request(String recurso, String httpMethod, String httpVersion,String json) {
+    public String request(String recurso, String httpMethod, String httpVersion,String json,String selecao) {
         String response = "";
         try {
-            InetAddress serverInetAddress = InetAddress.getByName("127.0.0.1");
+            InetAddress serverInetAddress = InetAddress.getByName(executor.choice(selecao));
             Socket connection = new Socket(serverInetAddress, 8080);
 
             try (OutputStream out = connection.getOutputStream();
@@ -59,4 +61,5 @@ public class HttpClient {
         }
         return "";
     }
+
 }
