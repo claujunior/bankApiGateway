@@ -1,6 +1,36 @@
 package org.claujunior.client;
 
 
-public class UDPClient {
+import java.net.DatagramPacket;
+import java.net.DatagramSocket;
+import java.net.InetAddress;
+import java.nio.charset.StandardCharsets;
 
+public class ClientUDP {
+
+    public ClientUDP() {
+    }
+
+    public void request(String mensagem ,InetAddress enderecoServidor) {
+
+        try (DatagramSocket socket = new DatagramSocket()) {
+
+
+            byte[] dados = mensagem.getBytes();
+
+            DatagramPacket pacote = new DatagramPacket(
+                    dados,
+                    dados.length,
+                    enderecoServidor,
+                    9090
+            );
+
+            socket.send(pacote);
+
+
+
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
 }

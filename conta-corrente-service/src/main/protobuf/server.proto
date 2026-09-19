@@ -1,0 +1,20 @@
+syntax = "proto3";
+package bankApiGateway;
+option java_package = "grpc";
+option java_multiple_files = true;
+
+message Cliente {
+  string nome = 1;
+  int32 idade = 2;
+  string CPF = 3;
+  double saldo = 4;
+}
+
+message CadastroResponse {
+  bool sucesso = 1;
+  string mensagem = 2;
+}
+service ClienteService {
+  // RPC to register a new client (Unary)
+  rpc CadastrarCliente (Cliente) returns (CadastroResponse);
+}

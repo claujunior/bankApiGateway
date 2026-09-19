@@ -3,10 +3,11 @@ package org.claujunior.servers;
 import org.claujunior.heartbeat.TimeoutBasedFailureDetector;
 import org.claujunior.servers.udp.clientHandlerUdp;
 
+import java.net.InetAddress;
 import java.util.List;
 
 public class ApiGateway {
-    private TimeoutBasedFailureDetector<String> executor = TimeoutBasedFailureDetector.getInstance();
+    private TimeoutBasedFailureDetector<InetAddress> executor = TimeoutBasedFailureDetector.getInstance();
     private List<InterfaceServer> servers;
     public ApiGateway(List<InterfaceServer> servers){
         this.servers=servers;

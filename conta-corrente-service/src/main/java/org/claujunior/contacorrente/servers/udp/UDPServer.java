@@ -1,7 +1,6 @@
-package org.claujunior.servers.udp;
+package org.claujunior.contacorrente.servers.udp;
 
-//import org.claujunior.client.UDPClient;
-import org.claujunior.servers.InterfaceServer;
+import org.claujunior.contacorrente.servers.InterfaceServer;
 import java.io.IOException;
 import java.net.DatagramPacket;
 import java.net.DatagramSocket;

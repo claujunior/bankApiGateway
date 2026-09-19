@@ -18,12 +18,12 @@ public class HttpClient {
     public static HttpClient getInstance() {
         return instance;
     }
-    private TimeoutBasedFailureDetector<String> executor = TimeoutBasedFailureDetector.getInstance();
+    private TimeoutBasedFailureDetector<InetAddress> executor = TimeoutBasedFailureDetector.getInstance();
 
     public String request(String recurso, String httpMethod, String httpVersion,String json,String selecao) {
         String response = "";
         try {
-            InetAddress serverInetAddress = InetAddress.getByName(executor.choice(selecao));
+            InetAddress serverInetAddress = executor.choice(selecao);
             Socket connection = new Socket(serverInetAddress, 8080);
 
             try (OutputStream out = connection.getOutputStream();
@@ -39,7 +39,7 @@ public class HttpClient {
 
     private void sendGet(OutputStream out,String recurso, String httpMethod, String httpVersion,String json) {
         try {
-            out.write(("POST " + recurso + " " + httpVersion + "\r\n").getBytes());
+            out.write((httpMethod + " " + recurso + " " + httpVersion + "\r\n").getBytes());
             out.write("Host: localhost\r\n".getBytes());
             out.write("\r\n".getBytes());
             out.write(json.getBytes());

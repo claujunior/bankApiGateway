@@ -2,6 +2,7 @@ package org.claujunior.heartbeat;
 
 import org.claujunior.client.HttpClient;
 
+import java.net.InetAddress;
 import java.util.LinkedList;
 import java.util.Map;
 import java.util.Set;
@@ -9,11 +10,11 @@ import java.util.List;
 import java.util.concurrent.ConcurrentHashMap;
 
 public class TimeoutBasedFailureDetector <T> extends AbstractFailureDetector<T>{
-    private static final TimeoutBasedFailureDetector <String> instance = new TimeoutBasedFailureDetector <String>(10000000000l);
+    private static final TimeoutBasedFailureDetector <InetAddress> instance = new TimeoutBasedFailureDetector <InetAddress>(10000000000l);
 
 
 
-    public static TimeoutBasedFailureDetector <String> getInstance() {
+    public static TimeoutBasedFailureDetector <InetAddress> getInstance() {
         return instance;
     }
 
@@ -73,9 +74,16 @@ public class TimeoutBasedFailureDetector <T> extends AbstractFailureDetector<T>{
         );
     }
     public T choice (String selecao){
-        if(selecao=="investimento"){
+        System.out.println("selecao recebida: [" + selecao + "]");
+        System.out.println(
+                "Investimento: " + heartbeatReceivedTimesInvestimento
+        );
+        System.out.println(
+                "Conta corrente: " + heartbeatReceivedTimesContaCorrente
+        );
+        if("investimento".equals(selecao)){
             if(heartbeatReceivedTimesInvestimento.isEmpty()){
-                //ex
+                return null;
             }
             else{
                 T resultado = heartbeatReceivedTimesInvestimento.getFirst();
@@ -83,9 +91,9 @@ public class TimeoutBasedFailureDetector <T> extends AbstractFailureDetector<T>{
                 return resultado;
             }
         }
-        else if(selecao=="contaCorrente"){
+        else if("contaCorrente".equals(selecao)){
             if(heartbeatReceivedTimesContaCorrente.isEmpty()){
-                //ex
+                return null;
             }
             else{
                 T resultado = heartbeatReceivedTimesContaCorrente.getFirst();
@@ -94,8 +102,7 @@ public class TimeoutBasedFailureDetector <T> extends AbstractFailureDetector<T>{
             }
         }
         else{
-            //ex
+            return null;
         }
-        return null;
     }
 }

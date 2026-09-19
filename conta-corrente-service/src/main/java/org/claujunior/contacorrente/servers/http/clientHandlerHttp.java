@@ -1,21 +1,16 @@
-package org.claujunior.servers.http;
+package org.claujunior.contacorrente.servers.http;
 
-import org.claujunior.client.HttpClient;
-import org.claujunior.heartbeat.TimeoutBasedFailureDetector;
 
 import java.io.BufferedReader;
 import java.io.DataOutputStream;
 import java.io.IOException;
 import java.io.InputStreamReader;
-import java.net.InetAddress;
 import java.net.Socket;
 import java.util.StringTokenizer;
 
 
 public class clientHandlerHttp implements Runnable{
     private Socket socket;
-    private HttpClient httpClient = HttpClient.getInstance();
-    private TimeoutBasedFailureDetector<InetAddress> executor = TimeoutBasedFailureDetector.getInstance();
     public clientHandlerHttp(Socket socket){
         this.socket = socket;
     }
@@ -30,7 +25,6 @@ public class clientHandlerHttp implements Runnable{
                 new InputStreamReader(socket.getInputStream()));) {
 
             String headerLine = in.readLine();
-            String clientIp = socket.getInetAddress().getHostAddress();
             StringTokenizer tokenizer = new StringTokenizer(headerLine);
 
             String httpMethod = tokenizer.nextToken();
@@ -48,61 +42,17 @@ public class clientHandlerHttp implements Runnable{
             char[] bodychar = new char[contentLength];
             int num = in.read(bodychar);
             String json = new String(bodychar,0,num);
-            HttpClient httpClient = HttpClient.getInstance();
             if(!httpVersion.equals("HTTP/1.1")){
                 sendResponse(socket, 200, "Correct version HTTP/1.1");
             }
             else {
                 if(httpMethod.equals("GET")){
-                    if(recurso.contains("investimento")){
-                        if(recurso.contains("saldo")){
-                            httpClient.request(recurso,httpMethod,httpVersion,json,"investimento");
-                        }
-                    }
-                    else if(recurso.contains("contaCorrente")){
-                        if(recurso.contains("saldo")){
-                            httpClient.request(recurso,httpMethod,httpVersion,json,"contaCorrente");
-                        }
-                    }
                     sendResponse(socket,200,"mande outra");
                 } else if (httpMethod.equals("POST")) {
-                    if(recurso.contains("investimento")){
-                        if(recurso.contains("criar")){
-                            httpClient.request(recurso,httpMethod,httpVersion,json,"investimento");
-                        }
-                    }
-                    else if(recurso.contains("contaCorrente")){
-                        if(recurso.contains("criar")){
-                            httpClient.request(recurso,httpMethod,httpVersion,json,"contaCorrente");
-                        }
-                    }
                     sendResponse(socket, 200, "POST");
                 } else if (httpMethod.equals("PUT")) {
-                    if(recurso.contains("investimento")){
-                        if(recurso.contains("resgatar")){
-                            httpClient.request(recurso,httpMethod,httpVersion,json,"investimento");
-                        }
-                        if(recurso.contains("guardar")){
-                            httpClient.request(recurso,httpMethod,httpVersion,json,"investimento");
-                        }
-                    }
-                    else if(recurso.contains("contaCorrente")){
-                        if(recurso.contains("attsaldo")){
-                            httpClient.request(recurso,httpMethod,httpVersion,json,"contaCorrente");
-                        }
-                    }
                     sendResponse(socket, 200, "PUT");
                 } else if (httpMethod.equals("DELETE")) {
-                    if(recurso.contains("investimento")){
-                        if(recurso.contains("deletar")){
-                            httpClient.request(recurso,httpMethod,httpVersion,json,"investimento");
-                        }
-                    }
-                    else if(recurso.contains("contaCorrente")){
-                        if(recurso.contains("deletar")){
-                            httpClient.request(recurso,httpMethod,httpVersion,json,"contaCorrente");
-                        }
-                    }
                     sendResponse(socket, 200, "DELETE");
                 } else {
                     sendResponse(socket, 405, "Method Not Allowed");
