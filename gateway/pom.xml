@@ -8,7 +8,7 @@
     <version>1.0-SNAPSHOT</version>
     <relativePath>../pom.xml</relativePath>
   </parent>
-  <artifactId>conta-corrente-service</artifactId>
+  <artifactId>gateway</artifactId>
   <build>
     <plugins>
       <plugin>
