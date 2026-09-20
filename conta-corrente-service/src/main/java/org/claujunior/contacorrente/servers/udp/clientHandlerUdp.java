@@ -1,12 +1,12 @@
 package org.claujunior.contacorrente.servers.udp;
 
-
-
+import org.claujunior.contacorrente.service.Service;
+import org.claujunior.contacorrente.service.ServiceException;
 import java.io.IOException;
 import java.net.DatagramPacket;
 import java.net.DatagramSocket;
 import java.net.InetAddress;
-
+import java.nio.charset.StandardCharsets;
 
 public class clientHandlerUdp implements Runnable{
     private DatagramSocket socket;
@@ -15,10 +15,11 @@ public class clientHandlerUdp implements Runnable{
     private String message;
     public clientHandlerUdp(DatagramSocket socket, DatagramPacket packet){
         this.socket = socket;
-        this.message = new String(packet.getData());
-        this.clientIp=packet.getAddress();
-        this.clientPort=packet.getPort();
+        this.clientIp = packet.getAddress();
+        this.clientPort = packet.getPort();
+        this.message = new String(packet.getData(), packet.getOffset(), packet.getLength(), StandardCharsets.UTF_8);
     }
+    private Service service = Service.getInstance();
 
     @Override
     public void run() {
@@ -27,91 +28,65 @@ public class clientHandlerUdp implements Runnable{
 
     private void handleRequest(DatagramSocket socket) {
         try {
-
             message = message.trim();
-            String[] partes = message.split(";", -1);
-            String servico = partes[0].trim();
-            if(partes.length < 2){
-                sendResponse(socket, 400, "Use servico;operacao;dados");
-                return;
-            }
+            String[] split = message.split(";");
 
-            if(!servico.equals("contaCorrente") && !servico.equals("investimento")){
-                sendResponse(socket, 400, "Servico deve ser contaCorrente ou investimento");
-                return;
+            if(message.contains("criar")){
+                if(split.length==4){
+                    String[] dados = {split[2], split[3]};
+                    String response = service.executar(split[1],dados);
+                    sendResponse(socket, 200, response);
+                }
             }
-            String operacao = partes[1].trim();
-            String nome = "";
-            String cpf;
-            if (operacao.equals("health")){
-                sendResponse(socket, 200, servico + ";UP");
-                return;
+            if(message.contains("saldo")){
+                if(split.length==3){
+                    String[] dados = {split[2]};
+                    String response = service.executar(split[1],dados);
+                    sendResponse(socket, 200, response);
+                }
             }
-            if(operacao.equals("criar")){
-                if(partes.length != 4){
-                    sendResponse(socket, 400, "Use " + servico + ";criar;nome;cpf");
-                    return;
+            if(message.contains("deletar")){
+                if(split.length==3){
+                    String[] dados = {split[2]};
+                    String response = service.executar(split[1],dados);
+                    sendResponse(socket, 200, response);
                 }
-                nome = partes[2].trim();
-                cpf = partes[3].trim();
-                if(nome.isEmpty()){
-                    sendResponse(socket, 400, "Nome obrigatorio");
-                    return;
-                }
-            } else if(operacao.equals("saldo")){
-                if(partes.length != 3){
-                    sendResponse(socket, 400, "Use " + servico + ";saldo;cpf");
-                    return;
-                }
-                cpf = partes[2].trim();
-            } else if(operacao.equals("attsaldo")){
-                if(partes.length != 3){
-                    sendResponse(socket, 400, "Use " + servico + ";attsaldo;cpf");
-                    return;
-                }
-                cpf = partes[2].trim();
-            } else if(operacao.equals("resgatar")){
-                if(partes.length != 3){
-                    sendResponse(socket, 400, "Use " + servico + ";resgatar;cpf");
-                    return;
-                }
-                cpf = partes[2].trim();
-            } else if(operacao.equals("guardar")){
-                if(partes.length != 3){
-                    sendResponse(socket, 400, "Use " + servico + ";guardar;cpf");
-                    return;
-                }
-                cpf = partes[2].trim();
-            } else if(operacao.equals("deletar")){
-                if(partes.length != 3){
-                    sendResponse(socket, 400, "Use " + servico + ";deletar;cpf");
-                    return;
-                }
-                cpf = partes[2].trim();
-            } else {
-                sendResponse(socket, 405, "Operacao nao permitida");
-                return;
             }
-
-            if(cpf.isEmpty()){
-                sendResponse(socket, 400, "CPF obrigatorio");
-                return;
+            if(message.contains("att")){
+                if(split.length==4){
+                    String[] dados = {split[2],split[3]};
+                    String response = service.executar(split[1],dados);
+                    sendResponse(socket, 200, response);
+                }
             }
-            sendResponse(socket, 200, "Mensagem recebida: " + servico + ";" + operacao);
+            if(message.contains("guardar")){
+                if(split.length==4){
+                    String[] dados = {split[2],split[3]};
+                    String response = service.executar(split[1],dados);
+                    sendResponse(socket, 200, response);
+                }
+            }
+            if(message.contains("resgatar")){
+                if(split.length==4){
+                    String[] dados = {split[2],split[3]};
+                    String response = service.executar(split[1],dados);
+                    sendResponse(socket, 200, response);
+                }
+            }
+        } catch (ServiceException e) {
+            sendResponse(socket, e.status(), e.getMessage());
         } catch (Exception e) {
             e.printStackTrace();
+            sendResponse(socket, 500, "Falha ao acessar o banco");
         }
     }
+
     public void sendResponse(DatagramSocket socket, int statusCode, String responseString) {
         try {
-            String response = statusCode + "\n" + responseString;
-            byte[] responseBytes = response.getBytes();
-            DatagramPacket responsePacket = new DatagramPacket(responseBytes, responseBytes.length,
-                    clientIp, clientPort);
-            socket.send(responsePacket);
-
-        } catch (IOException ex) {
-            ex.printStackTrace();
+            byte[] bytes = (statusCode + "\n" + responseString).getBytes(StandardCharsets.UTF_8);
+            socket.send(new DatagramPacket(bytes, bytes.length, clientIp, clientPort));
+        } catch (IOException e) {
+            e.printStackTrace();
         }
     }
 }

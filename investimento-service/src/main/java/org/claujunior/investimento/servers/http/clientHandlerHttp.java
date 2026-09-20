@@ -1,10 +1,12 @@
 package org.claujunior.investimento.servers.http;
 
+import org.claujunior.investimento.service.Service;
 
 import java.io.BufferedReader;
 import java.io.DataOutputStream;
 import java.io.IOException;
 import java.io.InputStreamReader;
+import java.net.InetAddress;
 import java.net.Socket;
 import java.util.StringTokenizer;
 
@@ -14,6 +16,7 @@ public class clientHandlerHttp implements Runnable{
     public clientHandlerHttp(Socket socket){
         this.socket = socket;
     }
+    private Service service = Service.getInstance();
     @Override
     public void run() {
         handleRequest(socket);
@@ -25,6 +28,7 @@ public class clientHandlerHttp implements Runnable{
                 new InputStreamReader(socket.getInputStream()));) {
 
             String headerLine = in.readLine();
+            String clientIp = socket.getInetAddress().getHostAddress();
             StringTokenizer tokenizer = new StringTokenizer(headerLine);
 
             String httpMethod = tokenizer.nextToken();
@@ -39,25 +43,47 @@ public class clientHandlerHttp implements Runnable{
                     );
                 }
             }
-            char[] bodychar = new char[contentLength];
-            int num = in.read(bodychar);
-            String json = new String(bodychar,0,num);
             if(!httpVersion.equals("HTTP/1.1")){
                 sendResponse(socket, 200, "Correct version HTTP/1.1");
             }
-            else {
-                if(httpMethod.equals("GET")){
-                    sendResponse(socket,200,"mande outra");
-                } else if (httpMethod.equals("POST")) {
-                    sendResponse(socket, 200, "POST");
-                } else if (httpMethod.equals("PUT")) {
-                    sendResponse(socket, 200, "PUT");
-                } else if (httpMethod.equals("DELETE")) {
-                    sendResponse(socket, 200, "DELETE");
-                } else {
-                    sendResponse(socket, 405, "Method Not Allowed");
+            String[] split = recurso.split("/");
+            if(recurso.contains("criar")){
+                if(split.length==5){
+                String[] dados  = {split[3], split[4]};
+                sendResponse(socket,200,service.executar(split[2],dados));
                 }
             }
+            if(recurso.contains("saldo")){
+                if(split.length==4){
+                    String[] dados  = {split[3]};
+                    sendResponse(socket,200,service.executar(split[2],dados));
+                }
+            }
+            if(recurso.contains("deletar")){
+                if(split.length==4){
+                    String[] dados  = {split[3]};
+                    sendResponse(socket,200,service.executar(split[2],dados));
+                }
+            }
+            if(recurso.contains("att")){
+                if(split.length==5){
+                    String[] dados  = {split[3],split[4]};
+                    sendResponse(socket,200,service.executar(split[2],dados));
+                }
+            }
+            if(recurso.contains("guardar")){
+                if(split.length==5){
+                    String[] dados  = {split[3],split[4]};
+                    sendResponse(socket,200,service.executar(split[2],dados));
+                }
+            }
+            if(recurso.contains("resgatar")){
+                if(split.length==5){
+                    String[] dados  = {split[3],split[4]};
+                    sendResponse(socket,200,service.executar(split[2],dados));
+                }
+            }
+
         } catch (Exception e) {
             e.printStackTrace();
         }

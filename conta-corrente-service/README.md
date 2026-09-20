@@ -1,7 +1,7 @@
 # conta-corrente-service
 
-Modulo Maven com configuracao compartilhada pelo POM da raiz. Fontes e saidas de compilacao sao proprias.
+Servico Java 21 com banco SQLite proprio via JDBC, sem framework de persistencia.
 
-Na raiz, execute: mvn -pl conta-corrente-service -am package
+Consulte [BANCOS.md](../BANCOS.md) para configuracao, execucao, rotas e testes.
 
-Consulte ../README.md para a estrutura, requisitos e limitacoes atuais. A classe App ainda nao possui main e o JAR nao esta configurado para java -jar.
+Na raiz: `mvn -pl conta-corrente-service -am package`.

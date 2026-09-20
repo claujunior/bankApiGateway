@@ -2,6 +2,8 @@ package org.claujunior.servers.http;
 
 import org.claujunior.client.HttpClient;
 import org.claujunior.heartbeat.TimeoutBasedFailureDetector;
+import org.claujunior.twoPhaseCommit.Coordinator;
+import org.claujunior.twoPhaseCommit.TransactionRef;
 
 import java.io.BufferedReader;
 import java.io.DataOutputStream;
@@ -9,6 +11,7 @@ import java.io.IOException;
 import java.io.InputStreamReader;
 import java.net.InetAddress;
 import java.net.Socket;
+import java.nio.charset.StandardCharsets;
 import java.util.StringTokenizer;
 
 
@@ -16,6 +19,7 @@ public class clientHandlerHttp implements Runnable{
     private Socket socket;
     private HttpClient httpClient = HttpClient.getInstance();
     private TimeoutBasedFailureDetector<InetAddress> executor = TimeoutBasedFailureDetector.getInstance();
+    private Coordinator coordinator = Coordinator.getInstance();
     public clientHandlerHttp(Socket socket){
         this.socket = socket;
     }
@@ -51,65 +55,106 @@ public class clientHandlerHttp implements Runnable{
             HttpClient httpClient = HttpClient.getInstance();
             if(!httpVersion.equals("HTTP/1.1")){
                 sendResponse(socket, 200, "Correct version HTTP/1.1");
+                return;
             }
             else {
                 if(httpMethod.equals("GET")){
                     if(recurso.contains("investimento")){
                         if(recurso.contains("saldo")){
-                            httpClient.request(recurso,httpMethod,httpVersion,json,"investimento");
+                            sendResponse1(socket,httpClient.request(recurso,httpMethod,httpVersion,json,"investimento"));
+                            return;
                         }
                     }
                     else if(recurso.contains("contaCorrente")){
                         if(recurso.contains("saldo")){
-                            httpClient.request(recurso,httpMethod,httpVersion,json,"contaCorrente");
+                            sendResponse1(socket,httpClient.request(recurso,httpMethod,httpVersion,json,"contaCorrente"));
+                            return;
                         }
                     }
-                    sendResponse(socket,200,"mande outra");
+                    sendResponse(socket,404,"Recurso nao encontrado");
                 } else if (httpMethod.equals("POST")) {
                     if(recurso.contains("investimento")){
                         if(recurso.contains("criar")){
-                            httpClient.request(recurso,httpMethod,httpVersion,json,"investimento");
+                            sendResponse1(socket,httpClient.request(recurso,httpMethod,httpVersion,json,"investimento"));
+                            return;
+                        }
+                        if(recurso.contains("transferencia")){
+                            String[] xd = recurso.split("/");
+                            if(xd.length==6) {
+                                String key1 = xd[1] + ":" + xd[3];//"investimento:cpf"
+                                String key2 = "contaCorrente:" + xd[4];//"contaCorrente:cpf"
+                                String valor = xd[5];
+                                TransactionRef transactionRef = new TransactionRef(System.nanoTime());
+                                coordinator.begin(transactionRef);
+                                coordinator.addKeyToTransaction(transactionRef,key1);
+                                coordinator.addKeyToTransaction(transactionRef,key2);
+                                sendResponse(socket,200,"Transacao iniciada");
+                                return;
+                            }
                         }
                     }
                     else if(recurso.contains("contaCorrente")){
                         if(recurso.contains("criar")){
-                            httpClient.request(recurso,httpMethod,httpVersion,json,"contaCorrente");
+                            sendResponse1(socket,httpClient.request(recurso,httpMethod,httpVersion,json,"contaCorrente"));
+                            return;
+                        }
+                        if(recurso.contains("transferencia")){
+                            String[] xd = recurso.split("/");
+                            if(xd.length==6) {
+                                String key1 = xd[1] + ":" + xd[3];//"contaCorrente:cpf"
+                                String key2 = "investimento:" + xd[4];//"investimento:cpf"
+                                String valor = xd[5];
+                                TransactionRef transactionRef = new TransactionRef(System.nanoTime());
+                                coordinator.begin(transactionRef);
+                                coordinator.addKeyToTransaction(transactionRef,key1);
+                                coordinator.addKeyToTransaction(transactionRef,key2);
+                                sendResponse(socket,200,"Transacao iniciada");
+                                return;
+                            }
                         }
                     }
-                    sendResponse(socket, 200, "POST");
+                    sendResponse(socket,404,"Recurso nao encontrado");
                 } else if (httpMethod.equals("PUT")) {
                     if(recurso.contains("investimento")){
-                        if(recurso.contains("resgatar")){
-                            httpClient.request(recurso,httpMethod,httpVersion,json,"investimento");
-                        }
-                        if(recurso.contains("guardar")){
-                            httpClient.request(recurso,httpMethod,httpVersion,json,"investimento");
+                        if(recurso.contains("att") || recurso.contains("guardar") || recurso.contains("resgatar")){
+                            sendResponse1(socket,httpClient.request(recurso,httpMethod,httpVersion,json,"investimento"));
+                            return;
                         }
                     }
                     else if(recurso.contains("contaCorrente")){
-                        if(recurso.contains("attsaldo")){
-                            httpClient.request(recurso,httpMethod,httpVersion,json,"contaCorrente");
+                        if(recurso.contains("att") || recurso.contains("guardar") || recurso.contains("resgatar")){
+                            sendResponse1(socket,httpClient.request(recurso,httpMethod,httpVersion,json,"contaCorrente"));
+                            return;
                         }
                     }
-                    sendResponse(socket, 200, "PUT");
+                    sendResponse(socket,404,"Recurso nao encontrado");
                 } else if (httpMethod.equals("DELETE")) {
                     if(recurso.contains("investimento")){
                         if(recurso.contains("deletar")){
-                            httpClient.request(recurso,httpMethod,httpVersion,json,"investimento");
+                            sendResponse1(socket,httpClient.request(recurso,httpMethod,httpVersion,json,"investimento"));
+                            return;
                         }
                     }
                     else if(recurso.contains("contaCorrente")){
                         if(recurso.contains("deletar")){
-                            httpClient.request(recurso,httpMethod,httpVersion,json,"contaCorrente");
+                            sendResponse1(socket,httpClient.request(recurso,httpMethod,httpVersion,json,"contaCorrente"));
+                            return;
                         }
                     }
-                    sendResponse(socket, 200, "DELETE");
+                    sendResponse(socket,404,"Recurso nao encontrado");
                 } else {
                     sendResponse(socket, 405, "Method Not Allowed");
                 }
             }
         } catch (Exception e) {
             e.printStackTrace();
+        }
+    }
+    public void sendResponse1(Socket socket, String aa){
+        try (DataOutputStream out = new DataOutputStream(socket.getOutputStream());) {
+            out.write(aa.getBytes());
+        }catch (IOException ex) {
+            ex.printStackTrace();
         }
     }
     public void sendResponse(Socket socket, int statusCode, String responseString) {

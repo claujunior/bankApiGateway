@@ -9,6 +9,13 @@
     <relativePath>../pom.xml</relativePath>
   </parent>
   <artifactId>conta-corrente-service</artifactId>
+  <dependencies>
+    <dependency>
+      <groupId>org.xerial</groupId>
+      <artifactId>sqlite-jdbc</artifactId>
+      <version>3.53.4.0</version>
+    </dependency>
+  </dependencies>
   <build>
     <plugins>
       <plugin>

@@ -43,6 +43,6 @@ Os modulos compartilham a configuracao Maven pelo parent, mas mantem fontes, pro
 
 Alteracoes nas dependencias ou plugins do POM principal sao herdadas pelos tres modulos. Dependencias exclusivas de um modulo podem ser declaradas no POM dele.
 
-## Estado atual
+## Bancos de dados
 
-Esta reorganizacao nao altera a logica Java. As classes App dos dois servicos ainda nao possuem main; a inicializacao precisa ser implementada. Os servidores atuais escutam em todas as interfaces: para compartilhar portas na mesma maquina, sera necessario configurar enderecos de escuta distintos ou ambientes de rede isolados. Nenhum heartbeat automatico ou regra bancaria foi acrescentado.
+Os dois servicos possuem inicializacao e persistencia independente via JDBC/SQLite. Consulte [BANCOS.md](BANCOS.md) para executar, configurar e testar.

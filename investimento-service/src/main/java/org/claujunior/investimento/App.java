@@ -1,11 +1,24 @@
 package org.claujunior.investimento;
 
-import java.net.DatagramPacket;
-import java.net.DatagramSocket;
-import java.net.InetSocketAddress;
-import java.nio.charset.StandardCharsets;
+import org.claujunior.investimento.heartbeat.TimeoutBasedFailureDetector;
+import org.claujunior.investimento.servers.ServerFactory;
+import org.claujunior.investimento.servers.Starter;
+import org.claujunior.investimento.service.Service;
 
+import java.net.InetAddress;
+import java.util.List;
 
 public final class App {
-
+    public static void main(String[] args) throws Exception {
+        TimeoutBasedFailureDetector<?> detector = new TimeoutBasedFailureDetector<>();
+        detector.start();
+        Service service = Service.getInstance();
+        new Starter(List.of(
+                ServerFactory.create("HTTP", 8082, 50),
+                ServerFactory.create("UDP", 9092, 50)
+                //ServerFactory.create("GRPC", grpc, 50)
+        ))
+                .start();
+        System.out.println(": HTTP=" + 8082 + ", UDP=" + 9092 + ", gRPC=");
+    }
 }

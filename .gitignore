@@ -37,3 +37,8 @@ build/
 
 ### Mac OS ###
 .DS_Store
+# Bancos locais dos servicos
+*.db
+*.db-journal
+*.db-wal
+*.db-shm

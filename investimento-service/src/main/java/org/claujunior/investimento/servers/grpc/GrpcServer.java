@@ -1,6 +1,6 @@
 package org.claujunior.investimento.servers.grpc;
 
-
+/*
 import grpc.CadastroResponse;
 import grpc.Cliente;
 import io.grpc.ServerBuilder;
@@ -34,3 +34,4 @@ public class GrpcServer implements InterfaceServer {
         }
     }
 }
+*/

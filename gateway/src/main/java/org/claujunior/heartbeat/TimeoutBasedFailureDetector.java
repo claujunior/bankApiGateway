@@ -54,10 +54,10 @@ public class TimeoutBasedFailureDetector <T> extends AbstractFailureDetector<T>{
     @Override
     public void heartBeatReceived(T serverId,String servico) {
         Long currentTime = System.nanoTime();
-        if(servico.equals("investimento")){
+        if(servico.equals("investimento") && !heartbeatReceivedTimesInvestimento.contains(serverId)){
             heartbeatReceivedTimesInvestimento.add(serverId);
         }
-        else if(servico.equals("contaCorrente")){
+        else if(servico.equals("contaCorrente") && !heartbeatReceivedTimesContaCorrente.contains(serverId)){
             heartbeatReceivedTimesContaCorrente.add(serverId);
         }
         heartbeatReceivedTimes.put(serverId, currentTime);
@@ -69,6 +69,13 @@ public class TimeoutBasedFailureDetector <T> extends AbstractFailureDetector<T>{
         );
     }
     private void markUp(T serverId) {
+
+        System.out.println(
+                "Investimento: " + heartbeatReceivedTimesInvestimento
+        );
+        System.out.println(
+                "Conta corrente: " + heartbeatReceivedTimesContaCorrente
+        );
         System.out.println(
                 "Servidor " + serverId + " em pe"
         );
