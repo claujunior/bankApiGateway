@@ -11,9 +11,13 @@ public class ReplicaMapper {
 
     public InetAddress serverFor(String key){
         String[] selecao = key.split(":");
-        String response = httpClient.request(key,"GET","HTTP/1.1","",selecao[0]);
+        String servico = selecao[0];
+        String cpf = selecao[1];
+        String recurso = "/" + servico + "/saldo/" + cpf + "/transacao";
+        InetAddress server = executor.choice(servico);
+        String response = httpClient.request(recurso,"GET","HTTP/1.1","",servico,server);
         if(response.contains("true")){
-            return executor.choice(selecao[0]);
+            return server;
         }
         return null;
     }

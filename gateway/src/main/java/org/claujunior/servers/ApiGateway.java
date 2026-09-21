@@ -1,7 +1,6 @@
 package org.claujunior.servers;
 
 import org.claujunior.heartbeat.TimeoutBasedFailureDetector;
-import org.claujunior.servers.udp.clientHandlerUdp;
 
 import java.net.InetAddress;
 import java.util.List;

@@ -5,9 +5,8 @@ option java_multiple_files = true;
 
 message Cliente {
   string nome = 1;
-  int32 idade = 2;
-  string CPF = 3;
-  double saldo = 4;
+  string CPF = 2;
+  string saldo = 3;
 }
 
 message CadastroResponse {
@@ -15,6 +14,6 @@ message CadastroResponse {
   string mensagem = 2;
 }
 service ClienteService {
-  // RPC to register a new client (Unary)
+  rpc CadastrarMultiCliente(stream Cliente) returns (CadastroResponse);
   rpc CadastrarCliente (Cliente) returns (CadastroResponse);
 }

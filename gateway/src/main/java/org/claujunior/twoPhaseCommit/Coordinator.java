@@ -1,8 +1,7 @@
 package org.claujunior.twoPhaseCommit;
 
-import org.claujunior.client.HttpClient;
-
 import java.util.Map;
+import java.net.InetAddress;
 import java.util.concurrent.ConcurrentHashMap;
 
 public class Coordinator {
@@ -47,6 +46,29 @@ public class Coordinator {
 
             metadata.addKey(key);
         }
+    }
+
+    public void addServerToTransaction(
+            TransactionRef transactionRef,
+            String key,
+            InetAddress server
+    ) {
+        TransactionMetadata metadata = transactions.get(transactionRef);
+        if (metadata == null) {
+            throw new IllegalArgumentException("Transação não encontrada");
+        }
+        metadata.addServer(key,server);
+    }
+
+    public void setStatus(
+            TransactionRef transactionRef,
+            TransactionStatus transactionStatus
+    ) {
+        TransactionMetadata metadata = transactions.get(transactionRef);
+        if (metadata == null) {
+            throw new IllegalArgumentException("Transação não encontrada");
+        }
+        metadata.setTransactionStatus(transactionStatus);
     }
 
 }

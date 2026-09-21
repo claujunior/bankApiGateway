@@ -12,7 +12,6 @@ public final class Database {
 
     public Database(Path file) {
         Path absolute = file.toAbsolutePath().normalize();
-        System.out.println("ajuda");
         try {
             Files.createDirectories(absolute.getParent());
         } catch (IOException e) {

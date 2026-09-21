@@ -1,14 +1,12 @@
 package org.claujunior.investimento.servers.grpc;
 
-/*
-import grpc.CadastroResponse;
-import grpc.Cliente;
+import io.grpc.Server;
 import io.grpc.ServerBuilder;
-import grpc.ClienteServiceGrpc;
-import io.grpc.stub.StreamObserver;
 import org.claujunior.investimento.servers.InterfaceServer;
 
 import java.io.IOException;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 
 public class GrpcServer implements InterfaceServer {
 
@@ -19,8 +17,9 @@ public class GrpcServer implements InterfaceServer {
     }
     @Override
     public void start(){
-        try {
-            var server = ServerBuilder.forPort(port)
+        try (ExecutorService executor = Executors.newVirtualThreadPerTaskExecutor()) {
+            Server server = ServerBuilder.forPort(port)
+                    .executor(executor)
                     .addService(new clientHandlerGrpc())
                     .build();
             server.start();
@@ -30,8 +29,7 @@ public class GrpcServer implements InterfaceServer {
             System.err.println("Servidor foi finalizado: " + e.getMessage());
             Thread.currentThread().interrupt();
         } catch (IOException e) {
-            e.printStackTrace();
+            System.err.println("Falha no servidor gRPC: " + e.getMessage());
         }
     }
 }
-*/

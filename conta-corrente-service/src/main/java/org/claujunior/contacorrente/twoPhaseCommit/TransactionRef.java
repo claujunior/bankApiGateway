@@ -1,4 +1,4 @@
-package org.claujunior.twoPhaseCommit;
+package org.claujunior.contacorrente.twoPhaseCommit;
 
 import java.util.UUID;
 import java.util.Objects;
@@ -12,8 +12,9 @@ public class TransactionRef {
         this.startTimestamp = startTimestamp;
     }
 
-    public UUID getTxnId() {
-        return txnId;
+    public TransactionRef(String txnId) {
+        this.txnId = UUID.fromString(txnId);
+        this.startTimestamp = System.nanoTime();
     }
 
     @Override
@@ -29,3 +30,4 @@ public class TransactionRef {
         return Objects.hash(txnId);
     }
 }
+

@@ -12,7 +12,7 @@ import java.net.InetAddress;
 
 public class clientHandlerUdp implements Runnable{
     private DatagramSocket socket;
-    private ClientUDP clientUDP;
+    private ClientUDP clientUDP = new ClientUDP();
     InetAddress clientIp;
     private String message;
     int port;
@@ -38,84 +38,127 @@ public class clientHandlerUdp implements Runnable{
             if(servico.contains("resposta")){
                 sendResponse(socket,servico);
             }
-            if(partes.length < 2){
-                sendResponse(socket, "Use servico;operacao;dados");
-                return;
-            }
-
-            if(!servico.equals("contaCorrente") && !servico.equals("investimento")){
-                sendResponse(socket, "Servico deve ser contaCorrente ou investimento");
-                return;
-            }
-            String operacao = partes[1].trim();
-            String nome = "";
-            String cpf;
-            if (operacao.contains("health")){
-                if(servico.contains("investimento")){
-                    executor.heartBeatReceived(clientIp,"investimento");
-                }
-                if(servico.contains("contaCorrente")){
-                    executor.heartBeatReceived(clientIp,"contaCorrente");
-                }
-                return;
-            }
-            if(operacao.equals("criar")){
-                if(partes.length != 4){
-                    sendResponse(socket, "Use " + servico + ";criar;nome;cpf");
-                    return;
-                }
-                nome = partes[2].trim();
-                cpf = partes[3].trim();
-                if(nome.isEmpty()){
-                    sendResponse(socket, "Nome obrigatorio");
-                    return;
-                }
-            } else if(operacao.equals("saldo")){
-                if(partes.length != 3){
-                    sendResponse(socket, "Use " + servico + ";saldo;cpf");
-                    return;
-                }
-                cpf = partes[2].trim();
-            } else if(operacao.equals("attsaldo")){
-                if(partes.length != 3){
-                    sendResponse(socket, "Use " + servico + ";attsaldo;cpf");
-                    return;
-                }
-                cpf = partes[2].trim();
-            } else if(operacao.equals("resgatar")){
-                if(partes.length != 3){
-                    sendResponse(socket, "Use " + servico + ";resgatar;cpf");
-                    return;
-                }
-                cpf = partes[2].trim();
-            } else if(operacao.equals("guardar")){
-                if(partes.length != 3){
-                    sendResponse(socket, "Use " + servico + ";guardar;cpf");
-                    return;
-                }
-                cpf = partes[2].trim();
-            } else if(operacao.equals("deletar")){
-                if(partes.length != 3){
-                    sendResponse(socket, "Use " + servico + ";deletar;cpf");
-                    return;
-                }
-                cpf = partes[2].trim();
-            } else {
-                sendResponse(socket, "Operacao nao permitida");
-                return;
-            }
-            if (servico.equals("contaCorrente")){
-                clientUDP.request(message,executor.choice("contaCorrente"));
-            }
-            if(servico.equals("investimento")){
-                clientUDP.request(message,executor.choice("investimento"));
-            }
-            sendResponse(socket, "Mensagem recebida: " + servico + ";" + operacao);
+            processMessage(socket, partes, servico);
         } catch (Exception e) {
-            e.printStackTrace();
+            sendResponse(socket,"500\nErro interno do gateway");
         }
     }
+
+    private void processMessage(DatagramSocket socket, String[] partes, String servico) {
+        if(!validateService(socket, partes, servico)){
+            return;
+        }
+
+        String operacao = partes[1].trim();
+        if(handleHealth(operacao, servico)){
+            return;
+        }
+        if(!validateOperation(socket, partes, servico, operacao)){
+            return;
+        }
+
+        sendResponse(socket,forwardRequest(servico));
+    }
+
+    private boolean validateService(DatagramSocket socket, String[] partes, String servico) {
+        if(partes.length < 2){
+            sendResponse(socket, "Use servico;operacao;dados");
+            return false;
+        }
+        if(!servico.equals("contaCorrente") && !servico.equals("investimento")){
+            sendResponse(socket, "Servico deve ser contaCorrente ou investimento");
+            return false;
+        }
+        return true;
+    }
+
+    private boolean handleHealth(String operacao, String servico) {
+        if (!operacao.contains("health")){
+            return false;
+        }
+        if(servico.contains("investimento")){
+            executor.heartBeatReceived(clientIp,"investimento");
+        }
+        if(servico.contains("contaCorrente")){
+            executor.heartBeatReceived(clientIp,"contaCorrente");
+        }
+        return true;
+    }
+
+    private boolean validateOperation(DatagramSocket socket, String[] partes,
+                                      String servico, String operacao) {
+        String nome = "";
+        String cpf;
+        if(operacao.equals("criar")){
+            if(partes.length != 4){
+                sendResponse(socket, "Use " + servico + ";criar;nome;cpf");
+                return false;
+            }
+            nome = partes[2].trim();
+            cpf = partes[3].trim();
+            if(nome.isEmpty()){
+                sendResponse(socket, "Nome obrigatorio");
+                return false;
+            }
+        } else if(operacao.equals("saldo")){
+            if(partes.length != 3){
+                sendResponse(socket, "Use " + servico + ";saldo;cpf");
+                return false;
+            }
+            cpf = partes[2].trim();
+        } else if(operacao.equals("attsaldo")){
+            if(partes.length != 4){
+                sendResponse(socket, "Use " + servico + ";attsaldo;cpf;valor");
+                return false;
+            }
+            cpf = partes[2].trim();
+        } else if(operacao.equals("resgatar")){
+            if(partes.length != 4){
+                sendResponse(socket, "Use " + servico + ";resgatar;cpf;valor");
+                return false;
+            }
+            cpf = partes[2].trim();
+        } else if(operacao.equals("guardar")){
+            if(partes.length != 4){
+                sendResponse(socket, "Use " + servico + ";guardar;cpf;valor");
+                return false;
+            }
+            cpf = partes[2].trim();
+        } else if(operacao.equals("deletar")){
+            if(partes.length != 3){
+                sendResponse(socket, "Use " + servico + ";deletar;cpf");
+                return false;
+            }
+            cpf = partes[2].trim();
+        } else {
+            sendResponse(socket, "Operacao nao permitida");
+            return false;
+        }
+        return true;
+    }
+
+    private String forwardRequest(String servico) {
+        if (servico.equals("contaCorrente")){
+            return clientUDP.request(
+                    message,
+                    executor.choice("contaCorrente"),
+                    "contaCorrente"
+            );
+        }
+        if(servico.equals("investimento")){
+            return clientUDP.request(
+                    message,
+                    executor.choice("investimento"),
+                    "investimento"
+            );
+        }
+        return "404\nServico nao encontrado";
+    }
+
     public void sendResponse(DatagramSocket socket, String responseString) {
+        if(responseString == null){
+            responseString = "503\nservidor indisponivel";
+        }
         try {
             byte[] responseBytes = responseString.getBytes();
             DatagramPacket responsePacket = new DatagramPacket(responseBytes, responseBytes.length,
@@ -123,7 +166,6 @@ public class clientHandlerUdp implements Runnable{
             socket.send(responsePacket);
 
         } catch (IOException ex) {
-            ex.printStackTrace();
         }
     }
 }

@@ -5,7 +5,6 @@ import org.claujunior.investimento.servers.ServerFactory;
 import org.claujunior.investimento.servers.Starter;
 import org.claujunior.investimento.service.Service;
 
-import java.net.InetAddress;
 import java.util.List;
 
 public final class App {
@@ -15,10 +14,10 @@ public final class App {
         Service service = Service.getInstance();
         new Starter(List.of(
                 ServerFactory.create("HTTP", 8082, 50),
-                ServerFactory.create("UDP", 9092, 50)
-                //ServerFactory.create("GRPC", grpc, 50)
+                ServerFactory.create("UDP", 9092, 50),
+                ServerFactory.create("GRPC", 50053, 50)
         ))
                 .start();
-        System.out.println(": HTTP=" + 8082 + ", UDP=" + 9092 + ", gRPC=");
+        System.out.println(": HTTP=" + 8082 + ", UDP=" + 9092 + ", gRPC=" + 50053);
     }
 }

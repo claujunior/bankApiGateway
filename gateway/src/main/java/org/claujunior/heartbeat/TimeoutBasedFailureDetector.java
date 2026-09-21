@@ -1,7 +1,5 @@
 package org.claujunior.heartbeat;
 
-import org.claujunior.client.HttpClient;
-
 import java.net.InetAddress;
 import java.util.LinkedList;
 import java.util.Map;
@@ -32,7 +30,7 @@ public class TimeoutBasedFailureDetector <T> extends AbstractFailureDetector<T>{
             new ConcurrentHashMap<>();
 
     @Override
-    void heartBeatCheck() {
+    synchronized void heartBeatCheck() {
         Long now = System.nanoTime();
         Set<T> serverIds = heartbeatReceivedTimes.keySet();
         for (T serverId : serverIds) {
@@ -40,10 +38,10 @@ public class TimeoutBasedFailureDetector <T> extends AbstractFailureDetector<T>{
             Long timeSinceLastHeartbeat = now - lastHeartbeatReceivedTime;
             if (timeSinceLastHeartbeat >= timeoutNanos) {
                 heartbeatReceivedTimes.remove(serverId);
-                    if(!heartbeatReceivedTimesContaCorrente.contains(serverId)){
+                    if(heartbeatReceivedTimesContaCorrente.contains(serverId)){
                         heartbeatReceivedTimesContaCorrente.remove(serverId);
                     }
-                    else if(!heartbeatReceivedTimesInvestimento.contains(serverId)){
+                    if(heartbeatReceivedTimesInvestimento.contains(serverId)){
                         heartbeatReceivedTimesInvestimento.remove(serverId);
                     }
                 markDown(serverId);
@@ -52,7 +50,7 @@ public class TimeoutBasedFailureDetector <T> extends AbstractFailureDetector<T>{
     }
 
     @Override
-    public void heartBeatReceived(T serverId,String servico) {
+    public synchronized void heartBeatReceived(T serverId,String servico) {
         Long currentTime = System.nanoTime();
         if(servico.equals("investimento") && !heartbeatReceivedTimesInvestimento.contains(serverId)){
             heartbeatReceivedTimesInvestimento.add(serverId);
@@ -64,6 +62,12 @@ public class TimeoutBasedFailureDetector <T> extends AbstractFailureDetector<T>{
         markUp(serverId);
     }
     private void markDown(T serverId) {
+        System.out.println(
+                "Investimento: " + heartbeatReceivedTimesInvestimento
+        );
+        System.out.println(
+                "Conta corrente: " + heartbeatReceivedTimesContaCorrente
+        );
         System.out.println(
                 "Servidor " + serverId + " caiu"
         );
@@ -80,14 +84,7 @@ public class TimeoutBasedFailureDetector <T> extends AbstractFailureDetector<T>{
                 "Servidor " + serverId + " em pe"
         );
     }
-    public T choice (String selecao){
-        System.out.println("selecao recebida: [" + selecao + "]");
-        System.out.println(
-                "Investimento: " + heartbeatReceivedTimesInvestimento
-        );
-        System.out.println(
-                "Conta corrente: " + heartbeatReceivedTimesContaCorrente
-        );
+    public synchronized T choice (String selecao){
         if("investimento".equals(selecao)){
             if(heartbeatReceivedTimesInvestimento.isEmpty()){
                 return null;

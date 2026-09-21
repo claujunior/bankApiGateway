@@ -28,7 +28,7 @@ public class HttpServer implements InterfaceServer {
                 Thread.startVirtualThread(new clientHandlerHttp(remote));
             }
         } catch (IOException ex) {
-            ex.printStackTrace();
+            System.err.println("Falha no servidor HTTP: " + ex.getMessage());
         }
     }
 

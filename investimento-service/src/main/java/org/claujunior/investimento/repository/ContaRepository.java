@@ -46,8 +46,7 @@ public final class ContaRepository {
         }
     }
 
-    // O incremento e a verificacao de saldo ocorrem na mesma instrucao SQL.
-    // Assim, requisicoes concorrentes nao sobrescrevem o saldo umas das outras.
+
     public long movimentar(String cpf, long valor) throws SQLException {
         try (var connection = database.open();
              var statement = connection.prepareStatement("""
@@ -62,7 +61,7 @@ public final class ContaRepository {
                 if (result.next()) return result.getLong(1);
             }
         }
-        saldo(cpf); // Distingue conta inexistente de saldo insuficiente.
+        saldo(cpf);
         throw new ServiceException(409, "Saldo insuficiente ou limite de saldo excedido");
     }
 

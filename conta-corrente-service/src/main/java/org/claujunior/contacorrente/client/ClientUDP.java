@@ -27,7 +27,7 @@ public class ClientUDP {
 
 
         } catch (Exception e) {
-            e.printStackTrace();
+            System.err.println("Falha ao enviar heartbeat: " + e.getMessage());
         }
     }
 }

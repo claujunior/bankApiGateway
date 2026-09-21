@@ -56,6 +56,9 @@ public final class Service {
             quantidade(dados, 2);
             criar(dados[0], dados[1], BigDecimal.ZERO);
             return "Conta criada";
+        } else if (operacao.contains("att")) {
+            quantidade(dados, 2);
+            return atualizarSaldo(dados[0], valor(dados[1])).toPlainString();
         } else if (operacao.contains("saldo")) {
             quantidade(dados, 1);
             return saldo(dados[0]).toPlainString();
@@ -63,9 +66,6 @@ public final class Service {
             quantidade(dados, 1);
             deletar(dados[0]);
             return "Conta removida";
-        } else if (operacao.contains("att")) {
-            quantidade(dados, 2);
-            return atualizarSaldo(dados[0], valor(dados[1])).toPlainString();
         } else if (operacao.contains("guardar")) {
             quantidade(dados, 2);
             return guardar(dados[0], valor(dados[1])).toPlainString();
