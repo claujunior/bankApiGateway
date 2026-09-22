@@ -83,6 +83,9 @@ public class clientHandlerHttp implements Runnable{
 
     private void handleGet(Socket socket, HttpClient httpClient, String recurso,
                            String httpMethod, String httpVersion, String json) {
+        if(handleProcessManager(socket,recurso,httpMethod)){
+            return;
+        }
         if(recurso.contains("investimento")){
             if(recurso.contains("saldo")){
                 sendResponse1(socket,httpClient.request(recurso,httpMethod,httpVersion,json,"investimento"));
@@ -100,6 +103,9 @@ public class clientHandlerHttp implements Runnable{
 
     private void handlePost(Socket socket, HttpClient httpClient, String recurso,
                             String httpMethod, String httpVersion, String json) {
+        if(handleProcessManager(socket,recurso,httpMethod)){
+            return;
+        }
         if(recurso.contains("investimento")){
             if(recurso.contains("criar")){
                 sendResponse1(socket,httpClient.request(recurso,httpMethod,httpVersion,json,"investimento"));
@@ -123,6 +129,49 @@ public class clientHandlerHttp implements Runnable{
             }
         }
         sendResponse(socket,404,"Recurso nao encontrado");
+    }
+
+    private boolean handleProcessManager(Socket socket, String recurso, String httpMethod) {
+        String[] partes = recurso.split("/");
+        if(partes.length != 3){
+            return false;
+        }
+
+        String servico = partes[1];
+        String operacao = partes[2];
+        if(!servico.equals("contaCorrente") && !servico.equals("investimento")){
+            return false;
+        }
+        if(httpMethod.equals("POST") && !operacao.equals("start") && !operacao.equals("stop")){
+            return false;
+        }
+        if(httpMethod.equals("GET") && !operacao.equals("status")){
+            return false;
+        }
+
+        try {
+            String variavel = servico.equals("investimento")
+                    ? "INVESTIMENTO_MANAGER_HOST"
+                    : "CONTA_CORRENTE_MANAGER_HOST";
+            String enderecoPadrao = servico.equals("investimento")
+                    ? "172.31.30.181"
+                    : "172.31.23.93";
+            InetAddress endereco = InetAddress.getByName(
+                    System.getenv().getOrDefault(variavel,enderecoPadrao)
+            );
+            sendResponse1(socket,httpClient.request(
+                    "/" + operacao,
+                    httpMethod,
+                    "HTTP/1.1",
+                    "",
+                    servico,
+                    endereco,
+                    8008
+            ));
+        } catch (Exception e) {
+            sendResponse(socket,500,"Erro ao acessar controlador do servico");
+        }
+        return true;
     }
 
     private boolean handleTransfer(Socket socket, String recurso, String destino) {

@@ -26,7 +26,16 @@ public class UDPServer implements InterfaceServer {
                 Thread.startVirtualThread(new clientHandlerUdp(serverSocket, receivePacket));
             }
         } catch (IOException e) {
-            System.err.println("Falha no servidor UDP: " + e.getMessage());
+            if(serverSocket != null && !serverSocket.isClosed()){
+                System.err.println("Falha no servidor UDP: " + e.getMessage());
+            }
+        }
+    }
+
+    @Override
+    public synchronized void stop() {
+        if(serverSocket != null){
+            serverSocket.close();
         }
     }
 }

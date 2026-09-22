@@ -32,14 +32,19 @@ public class HttpClient {
 
     public String request(String recurso, String httpMethod, String httpVersion,String json,
                           String selecao, InetAddress serverInetAddress) {
+        int port = "investimento".equals(selecao)
+                ? Integer.getInteger("investimento.http.port", 8082)
+                : Integer.getInteger("contacorrente.http.port", 8081);
+
+        return request(recurso,httpMethod,httpVersion,json,selecao,serverInetAddress,port);
+    }
+
+    public String request(String recurso, String httpMethod, String httpVersion,String json,
+                          String selecao, InetAddress serverInetAddress, int port) {
         try {
             if (serverInetAddress == null) {
                 return errorResponse(503, "Service Unavailable", "Servico indisponivel: " + selecao);
             }
-
-            int port = "investimento".equals(selecao)
-                    ? Integer.getInteger("investimento.http.port", 8082)
-                    : Integer.getInteger("contacorrente.http.port", 8081);
 
             try (Socket connection = new Socket()) {
                 connection.connect(

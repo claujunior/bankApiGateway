@@ -5,5 +5,8 @@ abstract class AbstractFailureDetector<T>{
     public void start() {
         heartbeatScheduler.start();
     }
+    public void stop() {
+        heartbeatScheduler.stop();
+    }
     abstract void heartBeatSend();
 }

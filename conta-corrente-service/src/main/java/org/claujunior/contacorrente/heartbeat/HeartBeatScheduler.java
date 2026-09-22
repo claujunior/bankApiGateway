@@ -23,7 +23,11 @@ public class HeartBeatScheduler {
 
     private ScheduledFuture scheduledTask;
 
-    public void start() {
+    public synchronized void start() {
+
+        if(scheduledTask != null && !scheduledTask.isDone()){
+            return;
+        }
 
         scheduledTask = executor.scheduleWithFixedDelay(
                 action,
@@ -31,5 +35,11 @@ public class HeartBeatScheduler {
                 heartBeatInterval,
                 TimeUnit.MILLISECONDS
         );
+    }
+
+    public synchronized void stop() {
+        if(scheduledTask != null){
+            scheduledTask.cancel(false);
+        }
     }
 }

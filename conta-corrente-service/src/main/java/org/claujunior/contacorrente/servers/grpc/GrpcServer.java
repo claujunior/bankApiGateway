@@ -7,10 +7,12 @@ import org.claujunior.contacorrente.servers.InterfaceServer;
 import java.io.IOException;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
+import java.util.concurrent.TimeUnit;
 
 public class GrpcServer implements InterfaceServer {
 
     int port;
+    private Server server;
     public GrpcServer(int port, int backlog){
         this.port = port;
 
@@ -18,10 +20,15 @@ public class GrpcServer implements InterfaceServer {
     @Override
     public void start(){
         try (ExecutorService executor = Executors.newVirtualThreadPerTaskExecutor()) {
-            Server server = ServerBuilder.forPort(port)
+            synchronized (this) {
+                if(server != null && !server.isShutdown()){
+                    return;
+                }
+                server = ServerBuilder.forPort(port)
                     .executor(executor)
                     .addService(new clientHandlerGrpc())
                     .build();
+            }
             server.start();
             System.out.println("GrpcServer Started");
             server.awaitTermination();
@@ -30,6 +37,18 @@ public class GrpcServer implements InterfaceServer {
             Thread.currentThread().interrupt();
         } catch (IOException e) {
             System.err.println("Falha no servidor gRPC: " + e.getMessage());
+        }
+    }
+
+    @Override
+    public synchronized void stop(){
+        if(server != null){
+            server.shutdownNow();
+            try {
+                server.awaitTermination(2, TimeUnit.SECONDS);
+            } catch (InterruptedException e) {
+                Thread.currentThread().interrupt();
+            }
         }
     }
 }

@@ -19,19 +19,35 @@ public class HttpServer implements InterfaceServer {
 
     @Override
     public void start() {
-
-        System.out.println("HttpServer Started");
         try  {
-            serverSocket = new ServerSocket(port, backlog);
+            synchronized (this) {
+                if(serverSocket != null && !serverSocket.isClosed()){
+                    return;
+                }
+                serverSocket = new ServerSocket(port, backlog);
+            }
+            System.out.println("HttpServer Started");
 
-            while (true) {
+            while (!serverSocket.isClosed()) {
                 Socket remote = serverSocket.accept();
                 Thread.startVirtualThread(new clientHandlerHttp(remote));
             }
         } catch (IOException ex) {
-            System.err.println("Falha no servidor HTTP: " + ex.getMessage());
+            if(serverSocket != null && !serverSocket.isClosed()){
+                System.err.println("Falha no servidor HTTP: " + ex.getMessage());
+            }
         }
     }
 
+    @Override
+    public synchronized void stop() {
+        try {
+            if(serverSocket != null){
+                serverSocket.close();
+            }
+        } catch (IOException e) {
+            System.err.println("Falha ao parar servidor HTTP: " + e.getMessage());
+        }
+    }
 
 }
