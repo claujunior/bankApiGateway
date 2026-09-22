@@ -1,0 +1,73 @@
+#!/usr/bin/env bash
+
+set -euo pipefail
+
+ROOT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+JAVA_21_HOME="${JAVA_21_HOME:-/usr/lib/jvm/java-21-amazon-corretto.x86_64}"
+
+export JAVA_HOME="$JAVA_21_HOME"
+export PATH="$JAVA_HOME/bin:$PATH"
+
+cd "$ROOT_DIR"
+service="${1:-}"
+
+case "$service" in
+  gateway)
+    module="gateway"
+    main_class="org.claujunior.App"
+    log_file="gateway.log"
+    ports="8080|9090|50051"
+    ;;
+  investimento)
+    module="investimento-service"
+    main_class="org.claujunior.investimento.App"
+    log_file="investimento.log"
+    ports="8082|9092|50053"
+    ;;
+  contaCorrente|contacorrente|conta-corrente)
+    module="conta-corrente-service"
+    main_class="org.claujunior.contacorrente.App"
+    log_file="conta-corrente.log"
+    ports="8081|9091|50052"
+    ;;
+  *)
+    echo "Uso: ./run gateway | ./run investimento | ./run contaCorrente"
+    exit 1
+    ;;
+esac
+
+pkill -f "$main_class" 2>/dev/null || true
+
+mvn -pl "$module" -am clean package
+mvn -pl "$module" dependency:copy-dependencies \
+  -DincludeScope=runtime \
+  -DoutputDirectory=target/dependency
+
+mkdir -p /home/ec2-user/data
+
+case "$service" in
+  gateway)
+    nohup java -cp "$module/target/classes:$module/target/dependency/*" \
+      "$main_class" > "$log_file" 2>&1 &
+    ;;
+  investimento)
+    nohup env \
+      GATEWAY_HOST="${GATEWAY_HOST:-172.31.22.224}" \
+      INVESTIMENTO_DB_PATH="${INVESTIMENTO_DB_PATH:-/home/ec2-user/data/investimento.db}" \
+      java -cp "$module/target/classes:$module/target/dependency/*" \
+      "$main_class" > "$log_file" 2>&1 &
+    ;;
+  contaCorrente|contacorrente|conta-corrente)
+    nohup env \
+      GATEWAY_HOST="${GATEWAY_HOST:-172.31.22.224}" \
+      CONTA_CORRENTE_DB_PATH="${CONTA_CORRENTE_DB_PATH:-/home/ec2-user/data/conta-corrente.db}" \
+      java -cp "$module/target/classes:$module/target/dependency/*" \
+      "$main_class" > "$log_file" 2>&1 &
+    ;;
+esac
+
+pid=$!
+echo "$service iniciado com PID $pid"
+sleep 3
+cat "$log_file"
+ss -lntup | grep -E "$ports" || true
