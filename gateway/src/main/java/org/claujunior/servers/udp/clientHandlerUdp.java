@@ -106,9 +106,9 @@ public class clientHandlerUdp implements Runnable{
                 return false;
             }
             cpf = partes[2].trim();
-        } else if(operacao.equals("attsaldo")){
+        } else if(operacao.equals("att")){
             if(partes.length != 4){
-                sendResponse(socket, "Use " + servico + ";attsaldo;cpf;valor");
+                sendResponse(socket, "Use " + servico + ";att;cpf;valor");
                 return false;
             }
             cpf = partes[2].trim();
