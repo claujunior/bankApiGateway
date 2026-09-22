@@ -13,9 +13,9 @@ public final class App {
         detector.start();
         Service service = Service.getInstance();
         new Starter(List.of(
-                ServerFactory.create("HTTP", 8081, 50),
-                ServerFactory.create("UDP", 9091, 50),
-                ServerFactory.create("GRPC", 50052, 50)
+                ServerFactory.create("HTTP", 8081, 300),
+                ServerFactory.create("UDP", 9091, 300),
+                ServerFactory.create("GRPC", 50052, 300)
         ))
                 .start();
         System.out.println(": HTTP=" + 8081 + ", UDP=" + 9091 + ", gRPC=" + 50052);

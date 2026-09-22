@@ -44,10 +44,10 @@ public class HttpClient {
             try (Socket connection = new Socket()) {
                 connection.connect(
                         new InetSocketAddress(serverInetAddress, port),
-                        3000
+                        4500
                 );
 
-                connection.setSoTimeout(5000);
+                connection.setSoTimeout(6000);
 
                 try (OutputStream out = connection.getOutputStream();
                      InputStream in = connection.getInputStream()) {
