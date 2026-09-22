@@ -44,7 +44,7 @@ public class TimeoutBasedFailureDetector <T> extends AbstractFailureDetector<T>{
                     if(heartbeatReceivedTimesInvestimento.contains(serverId)){
                         heartbeatReceivedTimesInvestimento.remove(serverId);
                     }
-                markDown(serverId);
+                //markDown(serverId);
             }
         }
     }
@@ -59,7 +59,7 @@ public class TimeoutBasedFailureDetector <T> extends AbstractFailureDetector<T>{
             heartbeatReceivedTimesContaCorrente.add(serverId);
         }
         heartbeatReceivedTimes.put(serverId, currentTime);
-        markUp(serverId);
+        //markUp(serverId);
     }
     private void markDown(T serverId) {
         System.out.println(

@@ -63,6 +63,7 @@ public class clientHandlerHttp implements Runnable{
         String[] split = recurso.split("/");
         handleCriar(socket, recurso, split);
         handleSaldo(socket, recurso, split);
+        handleDeletarTudo(socket, recurso, split);
         handleDeletar(socket, recurso, split);
         handleAtualizar(socket, recurso, split);
         handleGuardar(socket, recurso, split);
@@ -101,6 +102,13 @@ public class clientHandlerHttp implements Runnable{
                 String[] dados  = {split[3]};
                 sendResponse(socket,200,service.executar(split[2],dados));
             }
+        }
+    }
+
+    private void handleDeletarTudo(Socket socket, String recurso, String[] split) throws SQLException {
+        if(recurso.contains("deletarTudo") && split.length==3){
+            int quantidade = service.deletarTudo();
+            sendResponse(socket,200,quantidade + " contas removidas");
         }
     }
 

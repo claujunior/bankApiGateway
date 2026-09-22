@@ -75,6 +75,13 @@ public final class ContaRepository {
         throw new ServiceException(409, "A conta deve ter saldo zero para ser removida");
     }
 
+    public int deletarTudo() throws SQLException {
+        try (var connection = database.open();
+             var statement = connection.prepareStatement("DELETE FROM contas")) {
+            return statement.executeUpdate();
+        }
+    }
+
     public void verificarConexao() throws SQLException {
         try (var connection = database.open(); var statement = connection.createStatement();
              var result = statement.executeQuery("SELECT 1")) {

@@ -50,6 +50,8 @@ public final class Service {
 
     public void deletar(String cpf) throws SQLException { repository.deletar(validarCpf(cpf)); }
 
+    public int deletarTudo() throws SQLException { return repository.deletarTudo(); }
+
     public String executar(String operacao, String... dados) throws SQLException {
 
         if (operacao.contains("criar")) {
